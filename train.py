@@ -1,3 +1,4 @@
+import sys
 import tensorflow as tf
 from keras import backend as K
 from keras.models import Sequential, load_model
@@ -25,7 +26,7 @@ EPOCHS = 100
 def create_model():
 
 	model = Sequential()
-	
+
 	#Fully Connected Layer 1
 	model.add(Dense(16, input_shape = ([NUM_FLUXES]), activation = "relu"))
 	model.add(Dropout(0.5))
@@ -36,29 +37,48 @@ def create_model():
 
 	#Final Activation Layer
 	model.add(Dense(1, activation = "sigmoid"))
-	
+
 	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
-	
+
 	print(model.summary())
-	
+
 	return model
 
 
 #Train the model with training and validation images using data augmentation or without it
-def train():
+def train(model_name):
 
 	X_train, Y_train = prepare_data(NUM_TRAIN, "data/exoTrain.csv")
-	print("Retrieved data")
 	model = create_model()
-	print("Created model")
 
 	#Add some checkpoints
 	tensorboard = TensorBoard(log_dir = './Graph', histogram_freq = 0, write_graph = True, write_images = True)
-	checkpoint_train = ModelCheckpoint("model_train.h5", monitor = "loss", save_best_only = True)
+	checkpoint_train = ModelCheckpoint(model_path, monitor = "loss", save_best_only = True)
 	print("Added checkpoints")
-	
-	model.fit(x = X_train, y = Y_train, epochs = EPOCHS, 
+
+	model.fit(x = X_train, y = Y_train, epochs = EPOCHS,
 		callbacks = [tensorboard, checkpoint_train])
 
 
-train()
+
+#Code for running the program from the terminal
+terminal_length =  len(sys.argv)
+
+if(terminal_length >= 2):
+
+	#Help command
+	if(sys.argv[1] == "-h" or sys.argv[1] == "--help"):
+
+		print("Write the model name as an argument (without file extension)")
+
+	#Train command with model_name
+	else:
+
+		model_path = "models/" + sys.argv[1] + ".h5"
+		print("Beginning to train the model with the name " + sys.argv[1])
+		train(model_path)
+
+else:
+
+	print("Invalid command.")
+	print("Use -h or --help for the list of all possible commands")

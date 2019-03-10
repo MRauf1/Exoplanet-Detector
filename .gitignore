@@ -1,4 +1,5 @@
 *.h5
+models/
 __pycache__/
 data/
 Graph/

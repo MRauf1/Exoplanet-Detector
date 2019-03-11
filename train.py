@@ -6,6 +6,8 @@ from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers import Flatten, Dense, Activation, Dropout
 from keras.callbacks import TensorBoard, ModelCheckpoint
+from imblearn.over_sampling import SMOTE
+#import keras_metrics
 from random import shuffle
 from utilities import prepare_data
 import numpy as np
@@ -16,9 +18,9 @@ BatchNormalization, Input, concatenate, Activation
 from keras.optimizers import Adam
 
 
-NUM_TRAIN = 500
+NUM_TRAIN = 5087
 NUM_FLUXES = 3197
-EPOCHS = 100
+EPOCHS = 200
 
 
 
@@ -38,7 +40,7 @@ def create_model():
 	#Final Activation Layer
 	model.add(Dense(1, activation = "sigmoid"))
 
-	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
+	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"]) #[keras_metrics.binary_precision(), keras_metrics.binary_recall()]
 
 	print(model.summary())
 
@@ -48,7 +50,11 @@ def create_model():
 #Train the model with training and validation images using data augmentation or without it
 def train(model_name):
 
+	#SMOTE for upsampling the minority class
 	X_train, Y_train = prepare_data(NUM_TRAIN, "data/exoTrain.csv")
+	sm = SMOTE()
+	X_train, Y_train = sm.fit_sample(X_train, Y_train)
+
 	model = create_model()
 
 	#Add some checkpoints

@@ -2,14 +2,11 @@ import sys
 import os
 import tensorflow as tf
 from keras import backend as K
-from keras.models import Sequential, load_model
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import MaxPooling2D
-from keras.layers import Flatten, Dense, Activation, Dropout
+from keras.models import load_model
 from keras.callbacks import TensorBoard, ModelCheckpoint
-from random import shuffle
 from utilities import prepare_data
 import numpy as np
+
 
 NUM_TEST = 570
 NUM_FLUXES = 3197
@@ -22,6 +19,9 @@ def test(predict_or_evaluate, model_path):
 	model = load_model(model_path)
 
 	X_test, Y_test = prepare_data(NUM_TEST, "data/exoTest.csv")
+
+	#Reshape the array from 2D into 3D
+	X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
 	#Predict the inputted images' output
 	if(predict_or_evaluate == "--predict"):

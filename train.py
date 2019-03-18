@@ -1,26 +1,19 @@
 import sys
 import tensorflow as tf
 from keras import backend as K
-from keras.models import Sequential, load_model
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import MaxPooling2D
-from keras.layers import Flatten, Dense, Activation, Dropout
+from keras.models import Sequential
+from keras.layers import Conv1D, MaxPooling1D, Activation, CuDNNGRU, Flatten, Dense, Dropout, BatchNormalization
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from imblearn.over_sampling import SMOTE
-#import keras_metrics
-from random import shuffle
+import keras_metrics
 from utilities import prepare_data
 import numpy as np
 
-from keras.models import Sequential, Model
-from keras.layers import Conv1D, MaxPool1D, Dense, Dropout, Flatten, \
-BatchNormalization, Input, concatenate, Activation
-from keras.optimizers import Adam
 
 
 NUM_TRAIN = 5087
 NUM_FLUXES = 3197
-EPOCHS = 200
+EPOCHS = 5
 
 
 
@@ -29,18 +22,31 @@ def create_model():
 
 	model = Sequential()
 
-	#Fully Connected Layer 1
-	model.add(Dense(16, input_shape = ([NUM_FLUXES]), activation = "relu"))
-	model.add(Dropout(0.5))
+	#Convolutional Layer 1
+	model.add(Conv1D(filters = 64, kernel_size = 8, strides = 4, input_shape = (NUM_FLUXES, 1)))
+	model.add(MaxPooling1D(pool_size = 4, strides = 2))
+	model.add(Activation('relu'))
 
-	#Fully Connected Layer 2
-	model.add(Dense(4, activation = "relu"))
-	model.add(Dropout(0.5))
+	#Convolutional Layer 2
+	model.add(Conv1D(filters = 32, kernel_size = 8, strides = 4))
+	model.add(MaxPooling1D(pool_size = 4, strides = 2))
+	model.add(Activation('relu'))
+
+	#GRU Layer
+	model.add(CuDNNGRU(units = 256, return_sequences = True))
+
+	#Flatten 3D data into 2D format
+	model.add(Flatten())
+
+	#Fully Connected Layer
+	model.add(Dense(units = 16, activation = "relu"))
+	model.add(Dropout(rate = 0.5))
+	model.add(BatchNormalization())
 
 	#Final Activation Layer
-	model.add(Dense(1, activation = "sigmoid"))
+	model.add(Dense(units = 1, activation = "sigmoid"))
 
-	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"]) #[keras_metrics.binary_precision(), keras_metrics.binary_recall()]
+	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])#[keras_metrics.binary_precision(), keras_metrics.binary_recall()]) #[keras_metrics.binary_precision(), keras_metrics.binary_recall()]
 
 	print(model.summary())
 
@@ -55,7 +61,11 @@ def train(model_name):
 	sm = SMOTE()
 	X_train, Y_train = sm.fit_sample(X_train, Y_train)
 
+	#Reshape the array from 2D into 3D
+	X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+
 	model = create_model()
+
 
 	#Add some checkpoints
 	tensorboard = TensorBoard(log_dir = './Graph', histogram_freq = 0, write_graph = True, write_images = True)
@@ -64,6 +74,7 @@ def train(model_name):
 
 	model.fit(x = X_train, y = Y_train, epochs = EPOCHS,
 		callbacks = [tensorboard, checkpoint_train])
+
 
 
 

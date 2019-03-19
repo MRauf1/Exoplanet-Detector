@@ -5,15 +5,15 @@ from keras.models import Sequential
 from keras.layers import Conv1D, MaxPooling1D, Activation, CuDNNGRU, Flatten, Dense, Dropout, BatchNormalization
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from imblearn.over_sampling import SMOTE
-import keras_metrics
 from utilities import prepare_data
 import numpy as np
 
 
 
+
 NUM_TRAIN = 5087
 NUM_FLUXES = 3197
-EPOCHS = 5
+EPOCHS = 10
 
 
 
@@ -22,16 +22,11 @@ def create_model():
 
 	model = Sequential()
 
-	#Convolutional Layer 1
+	#Convolutional Layer
 	model.add(Conv1D(filters = 64, kernel_size = 8, strides = 4, input_shape = (NUM_FLUXES, 1)))
 	model.add(MaxPooling1D(pool_size = 4, strides = 2))
 	model.add(Activation('relu'))
-
-	#Convolutional Layer 2
-	model.add(Conv1D(filters = 32, kernel_size = 8, strides = 4))
-	model.add(MaxPooling1D(pool_size = 4, strides = 2))
-	model.add(Activation('relu'))
-
+	
 	#GRU Layer
 	model.add(CuDNNGRU(units = 256, return_sequences = True))
 
@@ -46,7 +41,7 @@ def create_model():
 	#Final Activation Layer
 	model.add(Dense(units = 1, activation = "sigmoid"))
 
-	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])#[keras_metrics.binary_precision(), keras_metrics.binary_recall()]) #[keras_metrics.binary_precision(), keras_metrics.binary_recall()]
+	model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
 
 	print(model.summary())
 

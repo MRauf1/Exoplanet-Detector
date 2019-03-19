@@ -73,6 +73,11 @@ def get_recall(true_positives, false_negatives):
 	return (true_positives / (true_positives + false_negatives))
 
 
+def get_specificity(false_positives, true_negatives):
+
+	return (true_negatives / (false_positives + true_negatives))
+
+
 def get_F1(precision, recall):
 
 	return (2 * ((precision * recall) / (precision + recall)))

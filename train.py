@@ -26,7 +26,7 @@ def create_model():
 	model.add(Conv1D(filters = 64, kernel_size = 8, strides = 4, input_shape = (NUM_FLUXES, 1)))
 	model.add(MaxPooling1D(pool_size = 4, strides = 2))
 	model.add(Activation('relu'))
-	
+
 	#GRU Layer
 	model.add(CuDNNGRU(units = 256, return_sequences = True))
 

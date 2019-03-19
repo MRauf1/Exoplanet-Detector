@@ -1,11 +1,12 @@
 import sys
 import os
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from keras import backend as K
 from keras.models import load_model
-from keras.callbacks import TensorBoard, ModelCheckpoint
-from utilities import prepare_data, get_positives_and_negatives, get_confusion_matrix, get_precision, get_recall, get_F1
+from utilities import prepare_data, get_positives_and_negatives, get_confusion_matrix, get_precision, get_recall, get_specificity, get_false_positive_rate, get_F1
 import numpy as np
+import sklearn.metrics as metrics
 
 
 NUM_TEST = 570
@@ -48,10 +49,39 @@ def test(predict_or_evaluate, model_path):
 		print("Precision: " + str(precision))
 
 		recall = get_recall(true_positives, false_negatives)
-		print("Recall: " + str(recall))
+		print("Recall/True Positive Rate: " + str(recall))
+
+		specificity = get_specificity(false_positives, true_negatives)
+		print("Specificity/True Negative Rate: " + str(specificity))
 
 		F1_score = get_F1(precision, recall)
 		print("F1 Score: " + str(F1_score))
+
+		#False and True Positive Rates specifically for the graph
+		fpr, tpr, _ = metrics.roc_curve(Y_test, predictions)
+		roc_auc = metrics.auc(fpr, tpr)
+
+		#Graphing the ROC curve
+		plt.title("ROC Curve for the Exoplanet Detector")
+		plt.plot(fpr, tpr, "b", label = "AUC = %0.2f" % roc_auc)
+		plt.legend(loc = "lower right")
+		plt.ylabel("True Positive Rate")
+		plt.xlabel("False Positive Rate")
+		plt.show()
+
+		#Precision and recall for the Precision-Recall curve
+		precision_graph, recall_graph, _ = metrics.precision_recall_curve(Y_test, predictions)
+		auc = metrics.auc(recall_graph, precision_graph)
+
+		#Graphing the Precision-Recall Curve
+		plt.title("Precision-Recall Curve for the Exoplanet Detector")
+		plt.plot(recall_graph, precision_graph, "b", label = "AUC = %0.2f" % auc)
+		plt.legend(loc = "lower right")
+		plt.xlim([0, 1.1])
+		plt.ylim([0, 1.1])
+		plt.ylabel("Precision")
+		plt.xlabel("Recall")
+		plt.show()
 
 
 #Code for running the program from the terminal

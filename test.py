@@ -4,7 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from keras import backend as K
 from keras.models import load_model
-from utilities import prepare_data, get_positives_and_negatives, get_confusion_matrix, get_precision, get_recall, get_specificity, get_false_positive_rate, get_F1
+from utilities import prepare_data, get_positives_and_negatives, get_confusion_matrix, get_precision, get_recall, get_specificity, get_F1
 import numpy as np
 import sklearn.metrics as metrics
 

@@ -83,6 +83,20 @@ def test(predict_or_evaluate, model_path):
 		plt.xlabel("Recall")
 		plt.show()
 
+		#Graphing a Confirmed Exoplanet
+		plt.title("Confirmed Exoplanet")
+		plt.plot(X_test[0])
+		plt.ylabel("Light Flux")
+		plt.xlabel("Time")
+		plt.show()
+
+		#Graphing a Confirmed Non-Exoplanet
+		plt.title("Confirmed Non-Exoplanet")
+		plt.plot(X_test[569])
+		plt.ylabel("Light Flux")
+		plt.xlabel("Time")
+		plt.show()
+
 
 #Code for running the program from the terminal
 terminal_length =  len(sys.argv)
